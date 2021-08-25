@@ -1,39 +1,49 @@
 ﻿Feature: UsersFeature
 
+@DeleteUser
 Scenario Outline: Verify user is created
-	Given user with email "<Email>" is absent
-	When create user:
-	| Name   | Email   | Gender   | Status   |
-	| <Name> | <Email> | <Gender> | <Status> |
+	Given user with email "testuser11@test.ts" is absent
+	When create user
 	Then verify user is created
-Examples:
-| Name        | Email              | Gender | Status   |
-| Test User11 | testuser11@test.ts | male   | active   |
-| Test User12 | testuser12@test.ts | female | active   |
-| Test User13 | testuser13@test.ts | female | active   |
 
+@RequiresUser
 Scenario: Verify user email is updated
-	Given user with email "testuser12@test.ts" is present
-	When partially update user with email "testuser12@test.ts":
-	| Email               |
-	| testuser_12@test.ts |
+	Given user with email "testuser11@test.ts" is present
+	When partially update user with email "testuser11@test.ts"
 	Then verify user is updated
 
+@RequiresUser
 Scenario: Verify user is updated
-	Given user with email "testuser13@test.ts" is present
-	When update user with email "testuser13@test.ts":
-	| Name        | Email              | Gender | Status   |
-	| Test Test14 | testuser14@test.ts | male   | inactive |
+	Given user with email "testuser11@test.ts" is present
+	When update user with email "testuser11@test.ts"
 	Then verify user is updated
 
-Scenario Outline: Verify user is deleted
-	Given user with email "<Email>" is present
-	When delete user with email "<Email>"
+@RequiresUser
+Scenario: Verify user is deleted
+	Given user with email "testuser11@test.ts" is present
+	When delete user with email "testuser11@test.ts"
 	Then verify user is deleted
-Examples:
-| Email               |
-| testuser11@test.ts  |
-| testuser12@test.ts  |
-| testuser_12@test.ts |
-| testuser13@test.ts  |
-| testuser14@test.ts  |
+
+@RequiresUser
+Scenario: Verify todo is created
+	Given user with email "testuser11@test.ts" is present
+	When user with email "testuser11@test.ts" creates todo
+	Then verify todo is created
+
+@RequiresUser @RequiresTodo
+Scenario: Verify todo is updated
+	Given user with email "testuser11@test.ts" is present
+		And todo with title "Sign up for course" is present
+	When update user`s todo partially
+	Then verify todo is updated
+
+@RequiresUser @RequiresTodo
+Scenario: Verify todo is deleted
+	Given todo with title "Sign up for course" is present
+	When delete user`s todo
+	Then verify todo is deleted
+
+Scenario: Verify page number
+	Given page number "10" of todos is loaded
+	When go to next page
+	Then verify the page is loaded

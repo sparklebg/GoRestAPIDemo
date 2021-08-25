@@ -1,69 +1,54 @@
-﻿using Newtonsoft.Json;
-using RestSharp;
+﻿using RestSharp;
+using System;
 
 namespace APIClient
 {
-    public class GoRestAPI<T>
-    {
-        
-        public RestClient client;
-        public RestRequest request;
-        public const string BASE_URL = "https://gorest.co.in/";
+    public class GoRestAPI
+    {   
+        private const string BASE_URL = "https://gorest.co.in/";
 
-        public RestClient CreateClient()
+        public RestClient CreateClient(Uri uri = null)
         {
-            client = new RestClient(BASE_URL);
+            RestClient client;
+
+            if (uri == null)
+            {
+                client = new RestClient(BASE_URL);
+            }
+            else
+            {
+                client = new RestClient(uri);
+            }
 
             return client;
         }
-
-        public RestRequest CreatePostRequest(string payload, string token)
-        {
-            var request = new RestRequest(Method.POST);
-            request.AddHeader("Accept", "application/json");
-            request.AddHeader("Content-Type", "application/json");
-            request.AddHeader("Authorization", string.Format("Bearer {0}", token));
-            request.AddParameter("application/json", payload, ParameterType.RequestBody);            
-
-            return request;
-        }
-
-        public RestRequest CreatePutRequest(string payload, string token)
-        {
-            var request = new RestRequest(Method.PUT);
-            request.AddHeader("Accept", "application/json");
-            request.AddHeader("Content-Type", "application/json");
-            request.AddHeader("Authorization", string.Format("Bearer {0}", token));
-            request.AddParameter("application/json", payload, ParameterType.RequestBody);
-
-            return request;
-        }
-
-        public RestRequest CreatePatchRequest(string payload, string token)
-        {
-            var request = new RestRequest(Method.PATCH);
-            request.AddHeader("Accept", "application/json");
-            request.AddHeader("Content-Type", "application/json");
-            request.AddHeader("Authorization", string.Format("Bearer {0}", token));
-            request.AddParameter("application/json", payload, ParameterType.RequestBody);
-
-            return request;
-        }
-
+       
         public RestRequest CreateGetRequest()
         {
             var request = new RestRequest(Method.GET);
             request.AddHeader("Accept", "application/json");
+            request.AddHeader("Content-Type", "application/json");
 
             return request;
         }
 
-        public RestRequest CreateDeleteRequest(string token)
+        public RestRequest CreateUpdateRequest(Method method, string payload, string accessToken)
+        {
+            var request = new RestRequest(method);
+            request.AddHeader("Accept", "application/json");
+            request.AddHeader("Content-Type", "application/json");
+            request.AddHeader("Authorization", string.Format("Bearer {0}", accessToken));
+            request.AddParameter("application/json", payload, ParameterType.RequestBody);
+
+            return request;
+        }
+
+        public RestRequest CreateDeleteRequest(string accessToken)
         {
             var request = new RestRequest(Method.DELETE);
             request.AddHeader("Accept", "application/json");
             request.AddHeader("Content-Type", "application/json");
-            request.AddHeader("Authorization", string.Format("Bearer {0}", token));
+            request.AddHeader("Authorization", string.Format("Bearer {0}", accessToken));
 
             return request;
         }
@@ -71,20 +56,6 @@ namespace APIClient
         public IRestResponse GetResponse(RestClient client, RestRequest request)
         {
             return client.Execute(request);
-        }
-
-        public DTO GetContent<DTO>(IRestResponse response)
-        {
-            var content = response.Content;
-            DTO dtoObject = JsonConvert.DeserializeObject<DTO>(content);
-
-            return dtoObject;
-        }
-
-        public string Serialize(dynamic content)
-        {
-            string serializeObject = JsonConvert.SerializeObject(content, Formatting.Indented);
-            return serializeObject;
         }
     }
 }
